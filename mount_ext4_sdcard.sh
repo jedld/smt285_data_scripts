@@ -91,7 +91,7 @@ echo "move data done."
 
 
 echo "making sure package manager is up"
-sleep 30
+sleep 20
 # cleanup uninstalled apps
 pm list packages
 if [ $? -eq 0 ];
