@@ -3,8 +3,18 @@
 ####################################################
 # auto-apps2sd by jedld for the SM-T285 v1.0
 # requires an ext4 formatted SD card to work
+#
+# WARNING THIS SCRIPT CAN CAUSE DATA LOSS
+# THIS IS PROVIDED AS-IS WITH NO WARRANTIES
 ####################################################
 
+# change this to point to the ext4 partition on your sdcard
+# e.g. mmcblk1p1 for partition 1 or mmcblk1p2 for partition 2
+ext4part=mmcblk1p2
+
+echo "====================================="
+echo "  auto-apps2sd version 1.0 by jedld  "
+echo "====================================="
 if [ ! -d "/data/external" ]; then
   mkdir /data/external
 fi
@@ -14,7 +24,8 @@ chmod 755 /data/app
 chown system:system /data/external
 
 # mount partition 2 of the sdcard, change this to customize your partiton scheme
-mount -t ext4 /dev/block/mmcblk1p2 /data/external
+echo "mounting $ext4part to /data/external"
+mount -t ext4 /dev/block/$ext4part /data/external
 chmod 777 /data/external
 chcon u:object_r:media_rw_data_file:s0 /data/external
 chcon u:object_r:media_rw_data_file:s0 /data/external/lost+found
@@ -75,3 +86,46 @@ do
     fi
   fi
 done
+
+echo "move data done."
+
+
+echo "making sure package manager is up"
+sleep 30
+# cleanup uninstalled apps
+pm list packages
+if [ $? -eq 0 ];
+then
+  echo "cleaning up uninstalled apps"
+  installed=($(pm list packages -f | sed -e 's/.*=//'))
+
+  uapks=($(ls /data/external/app/ -Z | awk '{ print $5 }'))
+
+  for uapk in "${uapks[@]}"
+  do
+    if [[ " ${installed[@]} " =~ " ${uapk::-2} " ]]; then
+      # ok file exists
+      echo "."
+    else
+      echo "cleaning up ${uapk::-2} apk: $uapk"
+      rm -rf /data/external/app/$uapk
+      # cleanup link
+      rm /data/app/$uapk
+    fi
+  done
+
+  udatas=($(ls /data/external/data/ -Z | awk '{ print $5 }'))
+
+  for udata in "${udatas[@]}"
+  do
+    if [[ " ${installed[@]} " =~ " ${udata} " ]]; then
+      # ok file exists
+      echo "."
+    else
+      echo "cleaning up data: $udata"
+      rm -rf /data/external/data/$udata
+      rm /data/data/$udata
+    fi
+  done
+  echo "cleanup apps done"
+fi
