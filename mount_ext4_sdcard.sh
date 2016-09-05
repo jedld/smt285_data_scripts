@@ -9,11 +9,14 @@ if [ ! -d "/data/external" ]; then
   mkdir /data/external
 fi
 
-chmod 777 /data/external
+
 chmod 755 /data/app
 chown system:system /data/external
 
-mount -t ext4 /dev/block/mmcblk1p1 /data/external
+# mount partition 2 of the sdcard, change this to customize your partiton scheme
+mount -t ext4 /dev/block/mmcblk1p2 /data/external
+chmod 777 /data/external
+chcon u:object_r:media_rw_data_file:s0 /data/external
 chcon u:object_r:media_rw_data_file:s0 /data/external/lost+found
 
 if [ ! -d "/data/external/app" ]; then
@@ -31,7 +34,7 @@ chown system:system /data/external/data
 chmod 755 /data/external/data
 
 #Create standard external sdcard directories
-sddirs=( "Download" "DCIM" "Movies" "Music" )
+sddirs=( "misc" )
 
 for dir in "${sddirs[@]}"
 do
@@ -48,10 +51,13 @@ apps=($(ls /data/app/ -Z | grep :apk_data_file: | sed /com.google./d | sed /com.
 for app in "${apps[@]}"
 do
   if [ ! -e "/data/external/app/$app" ]; then
-    echo "moving $app"
+    echo "moving apk $app"
     /system/xbin/cp -a /data/app/$app /data/external/app/
-    rm -rf /data/app/$app
-    ln -sf /data/external/app/$app /data/app/$app
+    if [ $? -eq 0 ];
+    then
+      rm -rf /data/app/$app
+      ln -sf /data/external/app/$app /data/app/$app
+    fi
   fi
 done
 
@@ -60,9 +66,12 @@ packages=($(ls /data/data/ -Z | grep :app_data_file: | sed /com.google./d | sed 
 for package in "${packages[@]}"
 do
   if [ ! -e "/data/external/data/$package" ]; then
-    echo "moving $package"
+    echo "moving data $package"
     /system/xbin/cp -a -c /data/data/$package /data/external/data/
-    rm -rf /data/data/$package
-    ln -sf /data/external/data/$package /data/data/$package
+    if [ $? -eq 0 ];
+    then
+      rm -rf /data/data/$package
+      ln -sf /data/external/data/$package /data/data/$package
+    fi
   fi
 done
