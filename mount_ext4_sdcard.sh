@@ -21,7 +21,6 @@ if [ ! -d "/data/external/app" ]; then
   chown system:system /data/external/app
 fi
 
-chcon u:object_r:apk_data_file:s0 /data/external/app
 chmod 755 /data/external/app
 
 if [ ! -d "/data/external/data" ]; then
@@ -50,7 +49,7 @@ for app in "${apps[@]}"
 do
   if [ ! -e "/data/external/app/$app" ]; then
     echo "moving $app"
-    /system/xbin/cp -a -c /data/app/$app /data/external/app/
+    /system/xbin/cp -a /data/app/$app /data/external/app/
     rm -rf /data/app/$app
     ln -sf /data/external/app/$app /data/app/$app
   fi
