@@ -39,17 +39,19 @@ adb push mount_ext4_sdcard.sh /data/scripts/vold.init/
 adb reboot
 ```
 
-6. After your device is done booting up, check the logs via:
+After your device is done booting up, it should start moving your apps, if you think there are issues or you just want to make sure check the logs. 
 
 ```
 adb pull /data/scripts/run-as-vold.log
 ```
 
-You can also do "adb shell" and visit the specified location.
+You can also do "adb shell" and visit the specified location:
+
+You should also notice sym links of your apps at /data/app and /data/data 
 
 If you intend to customize the script you might want to also check /data/misc/audit/audit.log for sepolicy violations. Even as root you can't just exec/chmod/chown/etc. any file and expect to get away with it.
 
-7. The extra storage won't show up when you query it, but your free space should increase. To know your free space, you have to go to the terminal or use adb shell and do
+Note: The extra storage won't show up in settings when you query it, but your free space should increase. To know your free space, you have to go to the terminal or use adb shell and do
 
 ```
 df
