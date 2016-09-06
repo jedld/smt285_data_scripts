@@ -44,6 +44,8 @@ adb reboot
 adb pull /data/scripts/run-as-vold.log
 ```
 
+You can also check /data/misc/audit/audit.log for sepolicy violations. Even as root you can't just exec/chmod/chown/etc. any file and expect to get away with it.
+
 6. The extra storage won't show up when you query it, but your free space should increase. To know your free space, you have to go to the terminal or use adb shell and do
 
 ```
