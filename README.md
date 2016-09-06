@@ -59,6 +59,16 @@ df
 
 and check the size of /data/external
 
+How to disable
+=====================
+
+If you want to disable auto migration during boot, simply delete the script at /data/scripts/vold.init/mount_ext4_sdcard.sh
+
+```
+adb shell
+$shell rm /data/scripts/vold.init/mount_ext4_sdcard.sh
+```
+
 
 Important Notes
 ===============
