@@ -75,8 +75,9 @@ Important Notes
 
 - Apps are only moved during reboots. If you install a new app, simply reboot your device and it should
 be moved to the ext4 partition automatically.
-- Uninstalled apps are also only cleaned up after a reboot, unfortunately
-- Not all apps are moved (system apps, samsung apps) are ignored. This is so that you have a somewhat working system if your sdcard is removed or fails for some reason. You can change this in the script (up to you)
+- Uninstalled apps are also only cleaned up after a reboot, unfortunately.
+- Some apps can crash if you suddenly remove the SD card. You should treat your SD card like an internal drive from now on.
+- Not all apps are moved (system apps, samsung apps) are ignored. This is so that you have a somewhat working system if your sdcard is removed or fails for some reason. You can, however, change this behavior in the script (up to you)
 
 
 
