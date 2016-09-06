@@ -2,12 +2,12 @@
 Various shell scripts for hacking the Samsung Galaxy Tab A 7.0 SM-T285 using the PURE Tinker Edition custom ROM.
 
 The Tinker Edition Custom ROM from THE SM-T285 allows for running shell scripts when those shell scripts are placed in
-/data/scripts/vold.init/. This script technically runs as root, however due to selinux policies its access is severly limited. However it is good enough for having an apps2sd like hack, and with a device that comes with only 8GB ram and with 4GB of free space left this is a big deal.
+/data/scripts/vold.init/. This script technically runs as root, however due to selinux policies its access is severly limited. However it is good enough for having an "apps2sd" like hack, and with a device that comes with only 8GB ram and with 4GB of free space left this is a big deal.
 
-mount_ext4_sdcard.sh - Script for moving apk and data files to an ext4 formatted sd card like apps2sd
+mount_ext4_sdcard.sh - Script for moving apk and data files on boot to an ext4 formatted sd card like how apps2sd does it.
 00_reset_card.sh - Script for disabling the apps2sd hack
 
-Enabling the "apps2sd hack"
+Enabling the script
 ===========================
 
 This procedure can cause loss of data, so make sure you have a backup, this script is still BETA I will not be responsible for any damage to your device.
@@ -16,7 +16,7 @@ Prerequisites
 ---------------
 
 1. Galaxy Tab A (2016) 7.0" (SM-T285) running the PURE Tinker Edition ROM (Use ODIN/Heimdall to flash to your OEM unlocked device)
-2. vfat and ext4 formatted micro SD Card with 2 partitions ( partition 1 -fat, partition 2 ext4). You can use gparted when using linux/ubuntu to achieve this. Not sure about windows but I believe there are tools to achieve the same effect. Best to use a fast sd card for a better user experience. Note that having a fat partition is necessary as some apps and services expect a fat filesystem for an external sd card. There may be a way to fix this but for now this is it.
+2. vfat and ext4 formatted micro SD Card with 2 partitions ( partition 1 -fat, partition 2 ext4). You can use gparted when using linux/ubuntu to achieve this. Not sure about windows but I believe there are tools to achieve the same effect. Best to use a fast sd card for a better user experience. Note that having a fat partition is necessary as some apps and services expect a fat filesystem for an external sd card. There may be a way to fix this but for now this is it. In theory using the apps2sd parition tool (https://play.google.com/store/apps/details?id=in.co.pricealert.apps2sd&hl=en) on another rooted phone with the sd card should work but haven't tried it personally.
 3. Android tools namely adb
 
 Procedure
