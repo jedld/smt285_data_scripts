@@ -58,7 +58,7 @@ do
 done
 
 # copy non system files to /data/external/data
-apps=($(ls /data/app/ -Z | grep :apk_data_file: | sed /com.google./d | sed /com.android./d | sed /com.sec./d | awk '{ print $5 }'))
+apps=($(ls /data/app/ -Z | grep :apk_data_file: | sed /com.google./d | sed /.xposed/d | sed /com.android./d | sed /com.sec./d | awk '{ print $5 }'))
 for app in "${apps[@]}"
 do
   if [ ! -e "/data/external/app/$app" ]; then
@@ -68,12 +68,11 @@ do
     then
       rm -rf /data/app/$app
       ln -sf /data/external/app/$app /data/app/$app
-      chown system:system /data/app/$app
     fi
   fi
 done
 
-packages=($(ls /data/data/ -Z | grep :app_data_file: | sed /com.google./d | sed /com.sec.android./d | sed /com.android./d | sed /com.cyanogenmod./d | awk '{ print $5 }'))
+packages=($(ls /data/data/ -Z | grep :app_data_file: | sed /com.google./d | sed /.xposed/d | sed /com.sec.android./d | sed /com.android./d | sed /com.cyanogenmod./d | awk '{ print $5 }'))
 #copy non system files to /data/external/data
 for package in "${packages[@]}"
 do
@@ -84,7 +83,6 @@ do
     then
       rm -rf /data/data/$package
       ln -sf /data/external/data/$package /data/data/$package
-      chown system:system /data/data/$package
     fi
   fi
 done
