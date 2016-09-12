@@ -68,6 +68,7 @@ do
     then
       rm -rf /data/app/$app
       ln -sf /data/external/app/$app /data/app/$app
+      chown system:system /data/app/$app
     fi
   fi
 done
@@ -83,6 +84,7 @@ do
     then
       rm -rf /data/data/$package
       ln -sf /data/external/data/$package /data/data/$package
+      chown system:system /data/data/$package
     fi
   fi
 done
