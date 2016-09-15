@@ -69,7 +69,7 @@ do
   fi
 done
 
-files=($(busybox ls -1 /data))
+files=($(busybox ls -1 /data/*))
 
 echo "# app data" >> $tmpdir/file_contexts
 for file in "${files[@]}"
@@ -86,6 +86,8 @@ for file in "${files[@]}"
 do
   if [ -d "$file" ]; then
     busybox ls -Z -d -1 $file | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
+  else
+    busybox ls -Z -d -1 $file | awk '{print $3 "       " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
   fi
 done
 
@@ -96,7 +98,7 @@ do
   if [ -d "$file" ]; then
     busybox ls -Z -d -1 $file | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
   else
-    busybox ls -Z -d -1 $file | awk '{print $3 "            " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
+    busybox ls -Z -d -1 $file | awk '{print $3 "               " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
   fi
 done
 
