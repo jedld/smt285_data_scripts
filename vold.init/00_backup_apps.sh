@@ -19,7 +19,6 @@ if [ ! -d "/data/external" ]; then
   mkdir /data/external
 fi
 
-
 chmod 755 /data/app
 chown system:system /data/external
 
@@ -35,85 +34,72 @@ chown root:sdcard_r /data/external/backups
 chmod 777 /data/external/backups
 
 now=$(date +"%m_%d_%Y_%H%M%s")
-echo "copying files to external backup location"
-busybox mkdir -Z u:object_r:media_rw_data_file:s0 /data/external/tmp
-tmpdir=/data/external/tmp/backup_$now
-busybox mkdir -Z u:object_r:media_rw_data_file:s0 $tmpdir
 
-/system/xbin/cp -a /data/app-asec $tmpdir/
-/system/xbin/cp -a /data/app-lib $tmpdir/
-/system/xbin/cp -a /data/data $tmpdir/
-/system/xbin/cp -a /data/app $tmpdir/
-/system/xbin/cp -a /data/media $tmpdir/
-/system/xbin/cp -a /data/mediadrm $tmpdir/
-/system/xbin/cp -a /data/security $tmpdir/
-/system/xbin/cp -a /data/scripts $tmpdir/
-/system/xbin/cp -a /data/user $tmpdir/
-/system/xbin/cp -a /data/system $tmpdir/
-/system/xbin/cp -a /data/drm $tmpdir/
-/system/xbin/cp -a /data/property $tmpdir/
-/system/xbin/cp -a /data/local $tmpdir/
-echo "copying files done."
+file_context_name=/data/external/misc/file_contexts_$now
 
 # generate file_contexts
-echo "# file contexts for /data" > $tmpdir/file_contexts
+echo "# file contexts for /data" > $file_context_name
+
 
 echo "generating context file"
-files=($(busybox ls -d -1 /data/*))
 
-echo "# directories" >> $tmpdir/file_contexts
+busybox ls -Z -d -1 -a /data | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+
+files=($(busybox ls -d -a -1 /data/*))
+echo "# directories" >> $file_context_name
 for file in "${files[@]}"
 do
   if [ -d "$file" ]; then
-    busybox ls -Z -d -1 $file | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
-  fi
-done
-
-files=($(busybox ls -1 /data/*))
-
-echo "# app data" >> $tmpdir/file_contexts
-for file in "${files[@]}"
-do
-  if [ -f "$file" ]; then
-    busybox ls -Z -d -1 $file | awk '{print $3 "            " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
-  fi
-done
-
-files=($(busybox ls -d -1 /data/data/*))
-
-echo "# app data" >> $tmpdir/file_contexts
-for file in "${files[@]}"
-do
-  if [ -d "$file" ]; then
-    busybox ls -Z -d -1 $file | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
+    busybox ls -Z -d -1 -a $file | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
   else
-    busybox ls -Z -d -1 $file | awk '{print $3 "       " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
+    busybox ls -Z -d -1 -a $file | awk '{print $3 "              " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
   fi
 done
 
-files=($(busybox ls -d -1 /data/app/*))
-echo "# app binary" >> $tmpdir/file_contexts
-for file in "${files[@]}"
+backup_dirs=("app" "data" "system" "security" "app-lib" "app-asec" "property")
+
+for dir in "${backup_dirs[@]}"
 do
-  if [ -d "$file" ]; then
-    busybox ls -Z -d -1 $file | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
-  else
-    busybox ls -Z -d -1 $file | awk '{print $3 "               " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
-  fi
+  echo "# $dir" >> $file_context_name
+  echo "# " >> $file_context_name
+  files=($(busybox ls -1 -d -a /data/$dir/*))
+  for file in "${files[@]}"
+  do
+    if [ -d "$file" ]; then
+      busybox ls -Z -d -a -1 $file | awk '{print $3 "(/.*)?            " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+    else
+      busybox ls -Z -d -a -1 $file | awk '{print $3 "                  " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+    fi
+  done
 done
 
-echo "# files" >> $tmpdir/file_contexts
-busybox ls -Z -d -1  /data/**/* | awk '{print $3 "        " $2}' | sed /No\ such\ file\ or\ directory/d  >> $tmpdir/file_contexts
+backup_dirs=("media" "mediadrm" "scripts" "user" "drm" "local" "misc")
+
+for dir in "${backup_dirs[@]}"
+do
+  echo "# $dir" >> $file_context_name
+  echo "# " >> $file_context_name
+  files=($(busybox ls -1 -d -a /data/$dir/**/*))
+  for file in "${files[@]}"
+  do
+
+    if [ -d "$file" ]; then
+      busybox ls -Z -d -a -1 $file | awk '{print $3 "(/.*)?            " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+    else
+      busybox ls -Z -d -a -1 $file | awk '{print $3 "                  " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+    fi
+  done
+done
 echo "generating context file done."
-
 
 filename=/data/external/misc/backup_$now.tar.gz
 echo "compressing backup file to $filename"
-cd $tmpdir
-tar -czvf $filename .
-chmod 777 $filename
-echo "compress done. cleaning up..."
-rm -rf $tmpdir
 
+cd /data
+tar -czvp --exclude backups -T /data/external/misc/file_contexts_$now --exclude scripts/vold.init/00_backup_apps.sh --exclude external -f $filename .
+
+chmod 777 $filename
+chmod 777 /data/external/misc/file_contexts_$now
+echo "compress done. cleaning up..."
 
 rm /data/scripts/vold.init/00_backup_apps.sh
