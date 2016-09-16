@@ -45,14 +45,14 @@ echo "generating context file"
 
 busybox ls -Z -d -1 -a /data | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
 
-files=($(busybox ls -d -a -1 /data/*))
+files=($(busybox ls -a -1 /data/ | sed /^\.$/d | sed /^\.\.$/d ))
 echo "# directories" >> $file_context_name
 for file in "${files[@]}"
 do
-  if [ -d "$file" ]; then
-    busybox ls -Z -d -1 -a $file | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+  if [ -d "/data/$file" ]; then
+    busybox ls -Z -d -1 /data/$file | awk '{print $3 "(/.*)?        " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
   else
-    busybox ls -Z -d -1 -a $file | awk '{print $3 "              " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+    busybox ls -Z -d -1 /data/$file | awk '{print $3 "              " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
   fi
 done
 
@@ -62,13 +62,13 @@ for dir in "${backup_dirs[@]}"
 do
   echo "# $dir" >> $file_context_name
   echo "# " >> $file_context_name
-  files=($(busybox ls -1 -d -a /data/$dir/*))
+  files=($(busybox ls -1 -a /data/$dir/ | sed /^\.$/d | sed /^\.\.$/d))
   for file in "${files[@]}"
   do
-    if [ -d "$file" ]; then
-      busybox ls -Z -d -a -1 $file | awk '{print $3 "(/.*)?            " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+    if [ -d "/data/$dir/$file" ]; then
+      busybox ls -Z -d -a -1 /data/$dir/$file | awk '{print $3 "(/.*)?            " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
     else
-      busybox ls -Z -d -a -1 $file | awk '{print $3 "                  " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+      busybox ls -Z -d -a -1 /data/$dir/$file | awk '{print $3 "                  " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
     fi
   done
 done
@@ -79,14 +79,14 @@ for dir in "${backup_dirs[@]}"
 do
   echo "# $dir" >> $file_context_name
   echo "# " >> $file_context_name
-  files=($(busybox ls -1 -d -a /data/$dir/**/*))
+  files=($(busybox ls -1 -a /data/$dir/ | sed /^\.$/d | sed /^\.\.$/d))
   for file in "${files[@]}"
   do
 
-    if [ -d "$file" ]; then
-      busybox ls -Z -d -a -1 $file | awk '{print $3 "(/.*)?            " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+    if [ -d "/data/$dir/$file" ]; then
+      busybox ls -Z -d -a -1 /data/$dir/$file | awk '{print $3 "(/.*)?            " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
     else
-      busybox ls -Z -d -a -1 $file | awk '{print $3 "                  " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
+      busybox ls -Z -d -a -1 /data/$dir/$file | awk '{print $3 "                  " $2 }' | sed /No\ such\ file\ or\ directory/d  >> $file_context_name
     fi
   done
 done
@@ -97,6 +97,8 @@ echo "compressing backup file to $filename"
 
 cd /data
 tar -czvp --exclude backups -T /data/external/misc/file_contexts_$now --exclude scripts/vold.init/00_backup_apps.sh --exclude external -f $filename .
+ln -sf $filename /data/external/misc/backup
+ln -sf  /data/external/misc/file_contexts_$now /data/external/misc/data_file_contexts
 
 chmod 777 $filename
 chmod 777 /data/external/misc/file_contexts_$now
